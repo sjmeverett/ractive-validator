@@ -7,8 +7,8 @@ define(['moment'], function (moment) {
     this.validationErrors = {};
 
     var defaultOptions = {
-      validators: RactiveValidator.validators,
-      messages: RactiveValidator.messages,
+      validators: {},
+      messages: {},
       messageSuffix: 'Msg',
       enabled: true
     };
@@ -18,7 +18,11 @@ define(['moment'], function (moment) {
     }
 
     this._validators = defaultOptions.validators;
+    merge(this._validators, RactiveValidator.validators);
+
     this._messages = defaultOptions.messages;
+    merge(this._messages, RactiveValidator.messages);
+    
     this._messageSuffix = defaultOptions.messageSuffix;
     this._enabled = defaultOptions.enabled;
 
