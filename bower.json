@@ -3,8 +3,8 @@
   "description": "Provides model validation on top of Ractive.js",
   "keywords": ["ractive", "validation"],
   "main": "ractive-validator.js",
-  "version": "0.1.0-alpha",
-  "ignore": ["bower_components", "tests", ".gitignore"],
+  "version": "0.1.0",
+  "ignore": ["tests", ".gitignore"],
   "license": "MIT",
   "authors": [
     "Stewart MacKenzie-Leigh (http://stewartml.co.uk)"
