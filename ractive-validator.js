@@ -1,19 +1,26 @@
 
 define(['moment'], function (moment) {
 
-  function RactiveValidator(ractive, rules, validators, messages) {
+  function RactiveValidator(ractive, rules, options) {
     this.ractive = ractive;
     this.rules = rules;
-    this._enabled = true;
-    this._validators = RactiveValidator.validators;
-    this._messages = RactiveValidator.messages;
     this.validationErrors = {};
 
-    if (typeof validators !== 'undefined' && validators != null)
-      merge(this._validators, validators);
+    var defaultOptions = {
+      validators: RactiveValidator.validators,
+      messages: RactiveValidator.messages,
+      messageSuffix: 'Msg',
+      enabled: true
+    };
 
-    if (typeof messages !== 'undefined')
-      merge(this._messages, messages);
+    if (typeof options !== 'undefined') {
+      merge(defaultOptions, options);
+    }
+
+    this._validators = defaultOptions.validators;
+    this._messages = defaultOptions.messages;
+    this._messageSuffix = defaultOptions.messageSuffix;
+    this._enabled = defaultOptions.enabled;
 
     for (var k in rules) {
       setValidator.call(this, k, rules[k]);
