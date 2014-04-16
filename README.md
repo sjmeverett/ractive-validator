@@ -97,7 +97,7 @@ Currently there are only a handful of built in validators.
 * `required: true` - the value of the field isn't `''`, `undefined`, or `null`
 * `number: true` - the field is a number
 * `integer: true` - the field is a whole number
-* `positive: true` - the field is greater than 0
+* `positive: true` - the field is positive
 * `date: <moment.js date format>` - the field is a valid date according to the given
 [moment.js date format](http://momentjs.com/docs/#/parsing/string-format/)
 
