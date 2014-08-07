@@ -50,7 +50,7 @@ define(['moment'], function (moment) {
       return isblank(value) || value >= 0;
     },
     date: function (value, rule) {
-      return moment(value, rule).isValid() ? true : rule;
+      return isblank(value) || moment(value, rule).isValid() ? true : rule;
     }
   };
 
