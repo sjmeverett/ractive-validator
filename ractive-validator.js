@@ -22,7 +22,7 @@ define(['moment'], function (moment) {
 
     this._messages = defaultOptions.messages;
     merge(this._messages, RactiveValidator.messages);
-    
+
     this._messageSuffix = defaultOptions.messageSuffix;
     this._enabled = defaultOptions.enabled;
 
@@ -31,19 +31,23 @@ define(['moment'], function (moment) {
     }
   }
 
+  function isblank(value) {
+    return value == '' || typeof value === 'undefined' || value === null;
+  }
+
 
   RactiveValidator.validators = {
     required: function (value, rule) {
-      return !(typeof value === 'undefined' || value === null || value === '');
+      return !isblank(value);
     },
     number: function (value, rule) {
-      return value.toString().match(/^-?[0-9]+(\.[0-9]+)?$/) != null;
+      return isblank(value) || value.toString().match(/^-?[0-9]+(\.[0-9]+)?$/) != null;
     },
     integer: function (value, rule) {
-      return value.toString().match(/^-?[0-9]+$/) != null;
+      return isblank(value) || value.toString().match(/^-?[0-9]+$/) != null;
     },
     positive: function (value, rule) {
-      return value >= 0;
+      return isblank(value) || value >= 0;
     },
     date: function (value, rule) {
       return moment(value, rule).isValid() ? true : rule;
