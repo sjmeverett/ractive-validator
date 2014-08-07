@@ -68,7 +68,7 @@ define(['moment'], function (moment) {
     if (this._enabled && !value) {
       //disabling
       for (var k in this.rules) {
-        delete this.rules[k + this._messageSuffix];
+        this.ractive.set(k + this._messageSuffix, '');
       }
     }
 
@@ -158,11 +158,11 @@ define(['moment'], function (moment) {
     }
 
     if (error != null) {
-      this.ractive.set(keypath + 'Msg', error);
+      this.ractive.set(keypath + this._messageSuffix, error);
       this.validationErrors[keypath] = error;
     }
     else {
-      this.ractive.set(keypath + 'Msg', undefined);
+      this.ractive.set(keypath + this._messageSuffix, undefined);
       delete this.validationErrors[keypath];
     }
   }
