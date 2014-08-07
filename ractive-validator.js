@@ -65,6 +65,13 @@ define(['moment'], function (moment) {
 
 
   RactiveValidator.prototype.enabled = function (value) {
+    if (this._enabled && !value) {
+      //disabling
+      for (var k in this.rules) {
+        delete this.rules[k + this._messageSuffix];
+      }
+    }
+
     this._enabled = value;
   };
 
