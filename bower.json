@@ -3,7 +3,7 @@
   "description": "Provides model validation on top of Ractive.js",
   "keywords": ["ractive", "validation"],
   "main": "ractive-validator.js",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "ignore": ["tests", ".gitignore"],
   "license": "MIT",
   "authors": [
