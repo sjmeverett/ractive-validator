@@ -27,6 +27,7 @@ define(['ractive-validator', 'jasmine-start', 'ractive'], function (RactiveValid
       expect(val.required(null, true)).toEqual(false);
       expect(val.required('', true)).toEqual(false);
       expect(val.required('a value', true)).toEqual(true);
+      expect(val.required('', false)).toEqual(true);
     });
 
     it('include a number validator', function () {

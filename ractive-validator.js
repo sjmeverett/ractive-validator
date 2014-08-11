@@ -38,7 +38,7 @@ define(['moment'], function (moment) {
 
   RactiveValidator.validators = {
     required: function (value, rule) {
-      return !isblank(value);
+      return !rule || !isblank(value);
     },
     number: function (value, rule) {
       return isblank(value) || value.toString().match(/^-?[0-9]+(\.[0-9]+)?$/) != null;
