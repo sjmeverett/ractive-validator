@@ -51,6 +51,9 @@ define(['moment'], function (moment) {
     },
     date: function (value, rule) {
       return isblank(value) || moment(value, rule).isValid() ? true : rule;
+    },
+    password: function (value, rule) {
+      return value === this.ractive.get(rule);
     }
   };
 
@@ -60,7 +63,8 @@ define(['moment'], function (moment) {
     number: 'must be a number',
     integer: 'must be a whole number',
     positive: 'must be a positive number',
-    date: 'must be a date (#)'
+    date: 'must be a date (#)',
+    password: 'passwords don\'t match'
   };
 
 

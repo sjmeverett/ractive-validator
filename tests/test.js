@@ -65,6 +65,12 @@ define(['ractive-validator', 'jasmine-start', 'ractive'], function (RactiveValid
       expect(val.date('fish', 'DD/MM/YYYY')).toEqual('DD/MM/YYYY');
       expect(val.date('', true)).toEqual(true);
     });
+
+    it('include a password validator', function () {
+      var mock = {ractive: {get: function(keypath) { return keypath; }}};
+      expect(val.password.call(mock, 'password', 'password')).toEqual(true);
+      expect(val.password.call(mock, 'foo', 'password')).toEqual(false);
+    });
   });
 
 
