@@ -1,9 +1,14 @@
-A form validator for the Ractive.JS framework
-==============================================
+A form validator compatible with the Ractive.JS framework
+=========================================================
 
 [Ractive.JS](http://www.ractivejs.org/) is a great framework for two-way model binding in javascript
 applications.  This project provides a validator class that you can use for forms bound with
 Ractive.
+
+It is also available as an npm package -- although the name of the package is `ractive-validator`,
+that is historical, and in fact any data can be validated.  I use this feature to have data checked
+on the client, AJAXd to the server and checked again with the same rules.  This way the user
+gets to know immediately if something is up, and my API doesn't accept dodgy data.
 
 Installation
 -------------
@@ -14,6 +19,12 @@ Install via [Bower](http://bower.io/):
 $ bower install -S ractive-validator
 ```
 
+Install via [npm](https://www.npmjs.org/):
+
+```
+$ npm install --save ractive-validator
+```
+
 You can also just clone it from github.  The main file is `ractive-validator.js`, which you could of
 course just download on its own.  If you want to run the tests, open `tests/Test.html` in your
 browser.
@@ -21,8 +32,8 @@ browser.
 Usage
 ------
 
-The validator is defined as a [RequireJS](http://requirejs.org/) module, where the export is the
-validator class:
+The validator class can be used with AMD and node.  For example, using require.js you could write
+the following:
 
 ```javascript
 define(['ractive', 'ractive-validator'], function (Ractive, RactiveValidator) {
@@ -34,12 +45,32 @@ define(['ractive', 'ractive-validator'], function (Ractive, RactiveValidator) {
 });
 ```
 
-The rules take the form of a map with [keypaths](http://docs.ractivejs.org/latest/keypaths) as keys
-and the validation rule to be applied to the keypath as values.  For example, if you wanted the
-`name` field to be required, you would write:
+Or, for node:
 
 ```javascript
-var validator = new RactiveValidator(ractive, {
+var RactiveValidator = require('ractive-validator');
+
+var validator = new RactiveValidator(mymodel, {
+  //rules
+});
+```
+
+The first parameter to the constructor is the data model.  This could be a normal javascript object
+containing the data, or it could be a Ractive instance (or indeed anything with `get` and `set` methods).
+Note that if your data model contains `get` or `set` properties, you will need to manually wrap it in
+an `ObjectModel` instance:
+
+```javascript
+var mymodel = {get: 5, set: 3};
+var validator = new RactiveValidator(new RactiveValidator.ObjectModel(mymodel), rules);
+```
+
+The rules argument to the constructor takes the form of a map with
+[keypaths](http://docs.ractivejs.org/latest/keypaths) as keys and the validation rule to be applied to
+the keypath as values.  For example, if you wanted the `name` field to be required, you would write:
+
+```javascript
+var validator = new RactiveValidator(model, {
   'name': {required: true}
 });
 ```
@@ -47,7 +78,7 @@ var validator = new RactiveValidator(ractive, {
 Multiple fields are supported by adding more keys to the map:
 
 ```javascript
-var validator = new RactiveValidator(ractive, {
+var validator = new RactiveValidator(model, {
   'name': {required: true},
   'age': {required: true}
 });
@@ -57,17 +88,23 @@ Pattern keypaths are supported too; for example, if you wanted all the item pric
 and required, you could write:
 
 ```javascript
-var validator = new RactiveValidator(ractive, {
+var validator = new RactiveValidator(model, {
   'items.*.price': {required: true, number: true}
 });
 ```
 
-The validator registers observers for all the keypaths you define rules for, so the validation
-updates when you edit fields.  Prior to submitting the form, you call the `valid` method, which
-runs validation on every field and returns whether or not the form is valid:
+If the `model` argument has an `observe` method, the keypaths supplied in the rules are
+automatically observed for changes.  So, if you are using it with Ractive, form validation will
+happen as the user types into the form.
+
+Prior to submitting the form, you call the `validate` method, which runs validation on every
+field and returns an object with the validation results.  One of the properties is `valid`, a
+boolean indicating whether or not the form is valid:
 
 ```javascript
-if (validator.valid()) {
+var validation = validator.validate();
+
+if (validation.valid) {
   //submit the form
 }
 else {
@@ -76,10 +113,15 @@ else {
 }
 ```
 
+Another property of the result object is `data`, which contains only the valid data found at the
+keypaths specified by the format rules.  The `errors` property contains any validation error
+messages.
+
 By default, if the validator finds an error on a field, it will put the appropriate error message in
 a property with the name of the field with `Msg` appended.  E.g., if the `name` field is required,
-but has no value, then the `nameMsg` field will be set to `'required'`.  You would probably have a
-`span` element to display the value of the error message:
+but has no value, then the `nameMsg` field will be set to `'required'`.  This is useful for frontend
+stuff for reporting errors to the user; you would probably have a `span` element to display the value
+of the error message:
 
 ```html
 <div class="{{nameMsg ? 'has-error' : ''}}">
@@ -88,88 +130,58 @@ but has no value, then the `nameMsg` field will be set to `'required'`.  You wou
 </div>
 ```
 
-I've also made it add an error css class if there is an error present.
+In the example, I've also made it add an error css class if there is an error present.
 
 ### Validators
 
 Currently there are only a handful of built in validators.
 
 * `required: true` - the value of the field isn't `''`, `undefined`, or `null`
+* `required: 'group name'` - the field will be required if other things in the same
+group have data, otherwise, it should be empty
 * `number: true` - the field is a number
 * `integer: true` - the field is a whole number
 * `positive: true` - the field is positive
-* `date: <moment.js date format>` - the field is a valid date according to the given
+* `moment: <moment.js date format>` - the field is a valid date according to the given
 [moment.js date format](http://momentjs.com/docs/#/parsing/string-format/)
+* `dataType: <string|integer|boolean>` - checks the data type of the object, mostly
+for backend API stuff
+* `password: 'keypath'` - makes sure the field and the specified keypath match, handy
+for forms with a 'confirm password' field
 
-These are defined in `RactiveValidator.validators`.
 
-You can easily create your own validators too.  A validator is just a function which returns `true`
-if the value given is valid, or `false` if the value is not valid.  Here is the `required` validator:
+You can easily create your own validators too.  A validator is just a function which returns
+an object with a `valid` property, and an `error` message if not valid.  The arguments passed
+to the validator function are the field value, the value specified in the rule, and the result
+object, in that order, and `this` is the validator instance.  For example, here is the
+`password` validator:
 
 ```javascript
-required: function (value, rule) {
-  return !(typeof value === 'undefined' || value === null || value === '');
+password: function (value, otherfield, result) {
+  if (value != result.model.get(otherfield)) {
+    return {valid: false, error: 'passwords must match'};
+  } else {
+    return {valid: true};
+  }
 }
 ```
 
-The `rule` argument is set to the value given in the rule, i.e. `{required: true}` will call the
-`required` validator with `rule` set to `true`, and `{multipleOf: 42}` will call the
-`multipleOf` validator (if you had one) with `rule` set to `42`.
-
-The validator can also return a string in the event of an error which provides more information
-about the error.  This is used only by the `date` validator currently, which returns the date format
-expected:
+It might be handy for you to know that the library uses John Resig's ridiculously obfuscated
+[Class pattern](http://ejohn.org/blog/simple-javascript-inheritance) (seriously, he's a genius, but
+I would hate to be on a team with him) to define the `RactiveValidator` and `RactiveValidator.ObjectModel`
+classes, so they can be extended in the manner described in that article.  An obvious use for this
+would be to add more validators:
 
 ```javascript
-date: function (value, rule) {
-  return moment(value, rule).isValid() ? true : rule;
-}
-```
-
-The `RactiveValidator` constructor takes a third argument containing options.  To add a validation
-function, you can pass in a `validators` option:
-
-```javascript
-var options = {
-  validators: {
-    multipleOf: function (value, rule) {
-      return value % rule == 0 ? true: rule;
-    }
+var MyValidator = RactiveValidator.extend({
+  init: function (model, format) {
+    this._super(model, format);
+    this.validators.mysupervalidator = mysupervalidator;
   }
-};
+});
 
-var validator = new RactiveValidator(ractive, {
-    //rules
-}, options);
+var validator = new MyValidator(model, format);
 ```
-
-### Messages
-
-There must be a validation message defined for every validator.  The default validation messages are
-defined in `RactiveValidator.messages`.  More can be supplied as a `messages` option:
-
-```javascript
-var options = {
-  validators: {/*...*/},
-  messages: {
-    multipleOf: 'must be a multiple of something'
-  }
-};
-```
-
-If the validator returns a string instead of `false` for an error, this can be inserted into your
-validation message by using a `#` symbol:
-
-```javascript
-var options = {
-  validators: {/*...*/},
-  messages: {
-    multipleOf: 'must be a multiple of #'
-  }
-};
-```
-
-This means your validation messages can't contain a normal `#` symbol.
 
 ### Disabling validation
 
@@ -179,25 +191,24 @@ just disable validation until after you have loaded the initial data, and then t
 
 ```javascript
 validator.enable(false);
+
+///...
 //load some data
+///...
+
 validator.enable(true);
 ```
 
-You can also construct the validator with in an initially-disabled state using the options argument:
+Calling the `enable` method with any value clears the validation errors at the `...Msg` fields
+described earlier.
 
-```javascript
-var validator = new RactiveValidator(ractive, {/*rules*/}, {enabled: false});
-```
+### Changing the error suffix
 
-### Changing the message suffix
-
-The `messageSuffix` option lets you configure what the error field for a given field will be.  For
+The `errorSuffix` property lets you configure what the error field for a given field will be.  For
 example, if you want the message for `name` to go into `nameError`, you would write:
 
 ```javascript
-var options = {
-  messageSuffix: 'Error'
-};
+validator.errorSuffix = 'Error';
 ```
 
 The end

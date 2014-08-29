@@ -1,17 +1,18 @@
 {
   "name": "ractive-validator",
-  "description": "Provides model validation on top of Ractive.js",
+  "description": "Validates objects according to given rules, in a manner compatible with Ractive (ractivejs.org).",
   "keywords": ["ractive", "validation"],
   "main": "ractive-validator.js",
-  "version": "0.1.3",
+  "version": "1.0.0",
   "ignore": ["tests", ".gitignore"],
   "license": "MIT",
   "authors": [
     "Stewart MacKenzie-Leigh (http://stewartml.co.uk)"
   ],
   "dependencies": {
-    "ractive": "~0.4.0",
-    "requirejs": "~2.1.11",
     "moment": "~2.6.0"
+  },
+  "devDependencies": {
+    "requirejs": "~2.1.11"
   }
 }

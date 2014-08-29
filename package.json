@@ -1,0 +1,12 @@
+{
+  "name": "ractive-validator",
+  "version": "1.0.0",
+  "description": "Validates objects according to given rules, in a manner compatible with Ractive (ractivejs.org).",
+  "author": "Stewart MacKenzie-Leigh",
+  "license": "MIT",
+  "main": "ractive-validator.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stewartml/ractive-validator"
+  }
+}
