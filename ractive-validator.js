@@ -263,5 +263,7 @@
     return str;
   }
 
+  RactiveValidator.ObjectModel = ObjectModel;
+
   return RactiveValidator;
 });
