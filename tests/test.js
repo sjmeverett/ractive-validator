@@ -145,5 +145,24 @@ define(['ractive-validator', 'jasmine-start', 'ractive', 'objectModel'], functio
     });
   });
 
+  describe('ObjectModel', function () {
+    it('supports setting non-existent array properties', function () {
+      var data = {};
+      var model = new ObjectModel(data);
+      model.set('array.0', 'fish');
+      expect(Array.isArray(data.array)).toEqual(true);
+      expect(data.array[0]).toEqual('fish');
+    });
+
+    it('supports setting wildcard keypaths', function () {
+      var data = {array: [0, 0, 0]};
+      var model = new ObjectModel(data);
+      model.set('array.*', 1);
+      expect(data.array[0]).toEqual(1);
+      expect(data.array[1]).toEqual(1);
+      expect(data.array[2]).toEqual(1);
+    });
+  });
+
   jasmineStart();
 });

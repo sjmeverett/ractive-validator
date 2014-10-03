@@ -31,7 +31,7 @@
      * @param keypath the keypath to get the value at
      */
     get: function (keypath) {
-      var paths = expandKeypath(keypath);
+      var paths = expandKeypath.call(this, keypath);
       var model = this.model;
 
       var results = paths.map(function (keypath) {
@@ -52,7 +52,7 @@
      * @param value the value to set it to
      */
     set: function (keypath, value) {
-      var paths = expandKeypath(keypath);
+      var paths = expandKeypath.call(this, keypath);
       var model = this.model;
 
       paths.forEach(function (keypath) {
@@ -72,15 +72,14 @@
         child: keypath
       };
     } else {
-      var path = keypath.substring(0, pos);
-      var child = keypath.substring(pos + 1);
+      var m = keypath.match(/^([^\.]+)\.(([^\.]+).*)$/);
 
-      if (!obj.hasOwnProperty(path)) {
-        obj[path] = isNaN(parseInt(path)) ? {} : [];
+      if (!obj.hasOwnProperty(m[1])) {
+        obj[m[1]] = isNaN(parseInt(m[3])) ? {} : [];
       }
 
-      obj = obj[path];
-      return getObj(obj, child);
+      obj = obj[m[1]];
+      return getObj(obj, m[2]);
     }
   }
 
@@ -90,10 +89,10 @@
 
     if (m != null) {
       var arrPath = m[1];
-      var arr = result.model.get(arrPath);
+      var arr = this.get(arrPath);
 
       for (var k in arr) {
-        validateKeypath.call(this, concat(k, m[2]), concat(parent, arrPath), paths);
+        expandKeypath.call(this, concat(k, m[2]), concat(parent, arrPath), paths);
       }
     }
     else {
