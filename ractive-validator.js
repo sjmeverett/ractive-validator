@@ -199,7 +199,7 @@
 
 
   function isblank(value) {
-    return value == '' || typeof value === 'undefined' || value === null;
+    return value === '' || typeof value === 'undefined' || value === null;
   }
 
 

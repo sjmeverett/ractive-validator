@@ -77,7 +77,7 @@ define(['ractive-validator', 'jasmine-start', 'ractive', 'objectModel'], functio
   });
 
 
-  describe('RactiveValidator.valid', function () {
+  describe('RactiveValidator.validate', function () {
     it('returns true for a valid model', function () {
       var validator = new RactiveValidator(new ObjectModel({num: 1, str: 'fish'}), {num: {required: true, number: true}, str: {required: true}});
       var result = validator.validate();
@@ -123,7 +123,15 @@ define(['ractive-validator', 'jasmine-start', 'ractive', 'objectModel'], functio
       expect(model.items.a.strMsg).toEqual(validator.validators.required('', true).error);
       expect(model.items.b.numMsg).toEqual(undefined);
       expect(model.items.b.strMsg).toEqual(undefined);
-    })
+    });
+
+    it('works with simple arrays', function () {
+      var model = {tags: ['tag1', 'selfie']};
+      var validator = new RactiveValidator(model, {'tags.*': {dataType: 'string'}});
+      var result = validator.validate();
+
+      expect(result.valid).toEqual(true);
+    });
   });
 
   describe('RactiveValidator.enabled', function () {
