@@ -22,7 +22,8 @@ require.config({
 define(['ractive-validator', 'jasmine-start', 'ractive', 'objectModel'], function (RactiveValidator, jasmineStart, Ractive, ObjectModel) {
 
   describe('The built-in validators', function () {
-    var val = (new RactiveValidator({}, {})).validators;
+    var validator = new RactiveValidator({}, {});
+    var val = validator.validators;
 
     it('include a required validator', function () {
       expect(val.required(undefined, true).valid).toEqual(false);
@@ -30,6 +31,16 @@ define(['ractive-validator', 'jasmine-start', 'ractive', 'objectModel'], functio
       expect(val.required('', true).valid).toEqual(false);
       expect(val.required('a value', true).valid).toEqual(true);
       expect(val.required('', false).valid).toEqual(true);
+      
+      validator.groups = {};
+      expect(val.required.call(validator, 'foo', 'group.value').valid).toEqual(true);
+      expect(validator.groups['group']).toEqual('value');
+      expect(val.required.call(validator, 'foo', 'group.value').valid).toEqual(true);
+      expect(val.required.call(validator, 'foo', 'group.another').valid).toEqual(false);
+      expect(val.required.call(validator, undefined, 'group2.value').valid).toEqual(true);
+      expect(validator.groups['group2']).toEqual(undefined);
+      expect(val.required.call(validator, 'foo', 'group2.another').valid).toEqual(true);
+      expect(validator.groups['group2']).toEqual('another');
     });
 
     it('include a number validator', function () {

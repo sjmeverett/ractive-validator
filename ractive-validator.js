@@ -111,15 +111,19 @@
             var groupName = match[1];
             var groupValue = match[2];
             var group = this.groups[groupName];
-
-            if (typeof group === 'undefined') {
-              this.groups[groupName] = groupValue;
-            } else if (group === groupValue) {
-              if (isblank(value)) {
+            
+            if (isblank(value)) {
+              if (group === groupValue) {
                 return {valid: false, error: 'required'};
+              } else {
+                return {valid: true}
               }
             } else {
-              if (!isblank(value)) {
+              if (typeof group === 'undefined') {
+                this.groups[groupName] = groupValue;
+              } else if (group == groupValue) {
+                return {valid: true};
+              } else {
                 return {valid: false, error: 'not required'};
               }
             }
