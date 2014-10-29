@@ -74,6 +74,16 @@ define(['ractive-validator', 'jasmine-start', 'ractive', 'objectModel'], functio
       expect(val.password('password', 'password', mock).valid).toEqual(true);
       expect(val.password('foo', 'password', mock).valid).toEqual(false);
     });
+    
+    it('include a data type validator', function () {
+      expect(val.dataType('a string', 'string').valid).toEqual(true);
+      expect(val.dataType('a string', 'integer').valid).toEqual(false);
+      expect(val.dataType(5, 'integer').valid).toEqual(true);
+      expect(val.dataType(5, 'string').valid).toEqual(false);
+      expect(val.dataType(true, 'boolean').valid).toEqual(true);
+      expect(val.dataType(true, 'integer').valid).toEqual(false);
+      expect(val.dataType(undefined, 'string').valid).toEqual(true);
+    });
   });
 
 

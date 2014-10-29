@@ -160,7 +160,9 @@
        * Checks the data type (mostly for programmer-facing APIs and such)
        */
       dataType: function (value, dataType) {
-        if (dataType == 'string' && typeof value !== 'string') {
+        if (typeof value === 'undefined') {
+          return {valid: true}
+        } else if (dataType == 'string' && typeof value !== 'string') {
           return {valid: false, error: 'must be a string'};
         } else if (dataType == 'integer' && (typeof value !== 'number' || value % 1 != 0)) {
           return {valid: false, error: 'must be an integer'};
