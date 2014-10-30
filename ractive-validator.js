@@ -214,10 +214,11 @@
 
     if (m != null) {
       var arrPath = m[1];
-      var arr = result.model.get(arrPath);
+      var p = (parent ? parent + '.' : '') + arrPath;
+      var arr = result.model.get(p);
 
       for (var k in arr) {
-        validateKeypath.call(this, concat(parent, arrPath), concat(k, m[2]), result, format);
+        validateKeypath.call(this, p, concat(k, m[2]), result, format);
       }
     }
     else {
