@@ -124,6 +124,15 @@ define(['ractive-validator', 'jasmine-start', 'ractive'], function (RactiveValid
       expect(result.errors.num).toEqual(model.numMsg);
       expect(result.errors.str).toEqual(model.strMsg);
     });
+    
+    it('doesn\'t reset an error message if the 2nd validator is valid', function () {
+      var model = {num: 'a', str: ''};
+      var validator = new RactiveValidator(new ObjectModel(model), {str: {required: true, dataType: 'string'}});
+      var result = validator.validate();
+
+      expect(model.strMsg).toEqual(validator.validators.required('', true).error);
+      expect(result.errors.str).toEqual(model.strMsg);
+    });
 
     it('handles array wildcard keypaths', function () {
       var model = {items: [{num: 'a', str: ''}, {num: '5', str: 'a str'}]};

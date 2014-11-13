@@ -436,6 +436,8 @@
         if (this.errorSuffix) {
           result.model.set(keypath + this.errorSuffix, validation.error);
         }
+        
+        break;
       }
     }
 
