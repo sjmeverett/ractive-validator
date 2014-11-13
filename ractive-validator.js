@@ -5,8 +5,194 @@
   } else if (typeof define === 'function' && define.amd) {
     define(dependencies, factory);
   }
-})(['./class', './objectModel', 'moment'], function (Class, ObjectModel, moment) {
+})(['moment'], function (moment) {
 
+  Class = (function () {
+
+    /* Simple JavaScript Inheritance
+     * By John Resig http://ejohn.org/
+     * MIT Licensed.
+     */
+     //http://ejohn.org/blog/simple-javascript-inheritance
+    // Inspired by base2 and Prototype
+
+
+    var initializing = false, fnTest = /xyz/.test(function(){xyz;}) ? /\b_super\b/ : /.*/;
+
+    // The base Class implementation (does nothing)
+    var Class = function(){};
+
+    // Create a new Class that inherits from this class
+    Class.extend = function(prop) {
+      var _super = this.prototype;
+
+      // Instantiate a base class (but only create the instance,
+      // don't run the init constructor)
+      initializing = true;
+      var prototype = new this();
+      initializing = false;
+
+      // Copy the properties over onto the new prototype
+      for (var name in prop) {
+        // Check if we're overwriting an existing function
+        prototype[name] = typeof prop[name] == "function" &&
+          typeof _super[name] == "function" && fnTest.test(prop[name]) ?
+          (function(name, fn){
+            return function() {
+              var tmp = this._super;
+
+              // Add a new ._super() method that is the same method
+              // but on the super-class
+              this._super = _super[name];
+
+              // The method only need to be bound temporarily, so we
+              // remove it when we're done executing
+              var ret = fn.apply(this, arguments);
+              this._super = tmp;
+
+              return ret;
+            };
+          })(name, prop[name]) :
+          prop[name];
+      }
+
+      // The dummy class constructor
+      function Class() {
+        // All construction is actually done in the init method
+        if (!initializing && this.init)
+          this.init.apply(this, arguments);
+      }
+
+      // Populate our constructed prototype object
+      Class.prototype = prototype;
+
+      // Enforce the constructor to be what we expect
+      Class.prototype.constructor = Class;
+
+      // And make this class extendable
+      Class.extend = arguments.callee;
+
+      return Class;
+    };
+
+    return Class;
+  })();
+  
+  
+  var ObjectModel = (function () {
+
+    /**
+     * Wraps javascript objects with a Ractive-like get/set object to access
+     * data by keypath.
+     * @author Stewart MacKenzie-Leigh
+     * @license MIT
+     */
+
+    var ObjectModel = Class.extend({
+      /**
+       * Constructor.
+       * @param model optional object to wrap
+       */
+      init: function (model) {
+        if (!model) {
+          this.model = {};
+        } else {
+          this.model = model;
+        }
+      },
+
+      /**
+       * Gets the value at the specified keypath.
+       * @param keypath the keypath to get the value at
+       */
+      get: function (keypath) {
+        var paths = expandKeypath.call(this, keypath);
+        var model = this.model;
+
+        var results = paths.map(function (keypath) {
+          var result = getObj(model, keypath);
+          return result.object[result.child];
+        });
+
+        if (results.length > 1) {
+          return results;
+        } else {
+          return results[0];
+        }
+      },
+
+      /**
+       * Sets the value at the specified keypath.
+       * @param keypath the keypath to set the value at
+       * @param value the value to set it to
+       */
+      set: function (keypath, value) {
+        var paths = expandKeypath.call(this, keypath);
+        var model = this.model;
+
+        paths.forEach(function (keypath) {
+          var result = getObj(model, keypath);
+          result.object[result.child] = value;
+        });
+      }
+    });
+
+
+    function getObj(obj, keypath) {
+      var pos = keypath.indexOf('.');
+
+      if (pos == -1) {
+        return {
+          object: obj,
+          child: keypath
+        };
+      } else {
+        var m = keypath.match(/^([^\.]+)\.(([^\.]+).*)$/);
+
+        if (!obj.hasOwnProperty(m[1])) {
+          obj[m[1]] = isNaN(parseInt(m[3])) ? {} : [];
+        }
+
+        obj = obj[m[1]];
+        return getObj(obj, m[2]);
+      }
+    }
+
+    function expandKeypath(keypath, parent, paths) {
+      if (!paths) paths = [];
+      var m = keypath.match(/^([^\*]*)\.\*(\..*)?$/);
+
+      if (m != null) {
+        var arrPath = m[1];
+        var arr = this.get(arrPath);
+
+        for (var k in arr) {
+          expandKeypath.call(this, concat(k, m[2]), concat(parent, arrPath), paths);
+        }
+      }
+      else {
+        if (parent) keypath = parent + '.' + keypath;
+        paths.push(keypath);
+      }
+
+      return paths;
+    }
+
+    function concat() {
+      var str = '';
+
+      for(var i = 0; i < arguments.length; i++) {
+        if (typeof arguments[i] !== 'undefined')
+          str += arguments[i];
+      }
+
+      return str;
+    }
+
+    return ObjectModel;
+  })();
+  
+  
   /**
    * Validates objects according to given rules, in a manner compatible with
    * Ractive (ractivejs.org).

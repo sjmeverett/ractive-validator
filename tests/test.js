@@ -19,8 +19,9 @@ require.config({
   }
 });
 
-define(['ractive-validator', 'jasmine-start', 'ractive', 'objectModel'], function (RactiveValidator, jasmineStart, Ractive, ObjectModel) {
-
+define(['ractive-validator', 'jasmine-start', 'ractive'], function (RactiveValidator, jasmineStart, Ractive) {
+  var ObjectModel = RactiveValidator.ObjectModel;
+  
   describe('The built-in validators', function () {
     var validator = new RactiveValidator({}, {});
     var val = validator.validators;
