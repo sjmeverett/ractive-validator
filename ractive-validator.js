@@ -1,11 +1,12 @@
 
-(function (dependencies, factory) {
+(function (factory) {
   if (typeof exports === 'object') {
-    module.exports = factory.apply(null, dependencies.map(require));
+    var moment = require('moment');
+    module.exports = factory(moment);
   } else if (typeof define === 'function' && define.amd) {
-    define(dependencies, factory);
+    define(['moment'], factory);
   }
-})(['moment'], function (moment) {
+})(function (moment) {
 
   Class = (function () {
 
