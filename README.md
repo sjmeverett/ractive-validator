@@ -1,23 +1,20 @@
 A form validator compatible with the Ractive.JS framework
 =========================================================
 
-[Ractive.JS](http://www.ractivejs.org/) is a great framework for two-way model binding in javascript
-applications.  This project provides a validator class that you can use for forms bound with
-Ractive.
+This package can be used to perform custom validation on JavaScript objects -- although the name of
+the package is `ractive-validator`, it doesn't have to be used with Ractive.  I like to use it on
+the client-side with Ractive, and also on the server, with the same rules, checking the request.body
+object.
 
-It is also available as an npm package -- although the name of the package is `ractive-validator`,
-that is historical, and in fact any data can be validated.  I use this feature to have data checked
-on the client, AJAXd to the server and checked again with the same rules.  This way the user
-gets to know immediately if something is up, and my API doesn't accept dodgy data.
+([Ractive.JS](http://www.ractivejs.org/) is a great framework for two-way model binding in javascript
+applications.)
+
+**Note:** the library was completely rewritten in CoffeeScript for version 2, and includes a couple of new features.
+It isn't completely backwards compatible!
+
 
 Installation
 -------------
-
-Install via [Bower](http://bower.io/):
-
-```
-$ bower install -S ractive-validator
-```
 
 Install via [npm](https://www.npmjs.org/):
 
@@ -25,9 +22,9 @@ Install via [npm](https://www.npmjs.org/):
 $ npm install --save ractive-validator
 ```
 
-You can also just clone it from github.  The main file is `ractive-validator.js`, which you could of
-course just download on its own.  If you want to run the tests, open `tests/Test.html` in your
-browser.
+You can also just clone it from github.  The main file is `dist/index.js`, which you could of
+course just download on its own.  If you want to run the tests, run `mocha` in the root
+directory (you'll need the dependencies installed).
 
 Usage
 ------
@@ -55,61 +52,83 @@ var validator = new RactiveValidator(mymodel, {
 });
 ```
 
-The first parameter to the constructor is the data model.  This could be a normal javascript object
-containing the data, or it could be a Ractive instance (or indeed anything with `get` and `set` methods).
-Note that if your data model contains `get` or `set` properties, you will need to manually wrap it in
-an `ObjectModel` instance:
+You can also just use it in the browser with a `script` tag.
+
+### The contructor
+
+The constructor has the signature `new RactiveValidator(basePath, model, rules)`.  The first two
+arguments are optional, so you can have either, both, or neither of them.
+
+#### the `rules` parameter
+
+We'll start with `rules`, since that is mandatory.  The rules define what data is valid and what is not,
+and are composed of an object keyed by *keypaths*.  A keypath (a Ractive concept) is just a reference
+into hierarchical data.  Take the following object:
 
 ```javascript
-var mymodel = {get: 5, set: 3};
-var validator = new RactiveValidator(new RactiveValidator.ObjectModel(mymodel), rules);
+var obj = {
+  data: {
+    list: [{name: 'bob'}, {name: 'betty'}],
+    count: 2
+  },
+  other: '',
+  crap: ''
+}
 ```
 
-The rules argument to the constructor takes the form of a map with
-[keypaths](http://docs.ractivejs.org/latest/keypaths) as keys and the validation rule to be applied to
-the keypath as values.  For example, if you wanted the `name` field to be required, you would write:
+The `count` property is at keypath `'data.count'`, while the string `'bob'` is at keypath
+`'data.list.0.name'` (note: Ractive also lets you use `'data.list[0].name'`, but I haven't
+bothered to implement that...).  Wildcard keypaths are also allowed, so for example,
+`'data.list.*.name'` refers to all the name properties in the list.
+
+So, we can now build rules to make sure `count` is positive and each element in `list` has
+a name property with a non-empty value:
 
 ```javascript
-var validator = new RactiveValidator(model, {
-  'name': {required: true}
+var validator = new RactiveValidator({
+  'data.list.*.name': {required: true},
+  'data.count': {required: true, positive: true, type: 'integer'}
 });
 ```
 
-Multiple fields are supported by adding more keys to the map:
+As you can hopefully see, rules are defined by creating an object with a property for each keypath.  The
+validators to be applied to the keypath are specified in an object as the value of the property.  See
+the **Validators** section for what validators are allowed.
+
+
+#### the `model` parameter
+
+You can provide a model at construction.  It can either be just a Plain Old JavaScript Object, or a
+'model' object with `.get` and `.set` methods for getting and setting keypaths (e.g., a Ractive object).
+
+If the given model also has an `.observe` method (i.e., is a Ractive object), the validator will listen
+for changes to the keypaths defined in the rules, and validate in real time.
+
+
+#### the 'basePath' parameter
+
+`basePath` sets the base keypath.  That is, the example given previously could have been written as:
 
 ```javascript
-var validator = new RactiveValidator(model, {
-  'name': {required: true},
-  'age': {required: true}
+var validator = new RactiveValidator('data', {
+  'list.*.name': {required: true},
+  'count': {required: true, positive: true, type: 'integer'}
 });
 ```
 
-Pattern keypaths are supported too; for example, if you wanted all the item prices to be numeric
-and required, you could write:
+### the `validate` method
+
+This method runs the validation on the model: this will be the argument supplied to this method
+if there is one, or the model given at construction.
 
 ```javascript
-var validator = new RactiveValidator(model, {
-  'items.*.price': {required: true, number: true}
-});
-```
-
-If the `model` argument has an `observe` method, the keypaths supplied in the rules are
-automatically observed for changes.  So, if you are using it with Ractive, form validation will
-happen as the user types into the form.
-
-Prior to submitting the form, you call the `validate` method, which runs validation on every
-field and returns an object with the validation results.  One of the properties is `valid`, a
-boolean indicating whether or not the form is valid:
-
-```javascript
-var validation = validator.validate();
+var validation = validator.validate(model);
 
 if (validation.valid) {
-  //submit the form
+  // yay!!
 }
 else {
-  //scroll up to let the user see validation messages
-  window.scrollTo(0,0);
+  // oh no!
 }
 ```
 
@@ -121,7 +140,7 @@ By default, if the validator finds an error on a field, it will put the appropri
 a property with the name of the field with `Msg` appended.  E.g., if the `name` field is required,
 but has no value, then the `nameMsg` field will be set to `'required'`.  This is useful for frontend
 stuff for reporting errors to the user; you would probably have a `span` element to display the value
-of the error message:
+of the error message, as in the following example using Ractive:
 
 ```html
 <div class="{{nameMsg ? 'has-error' : ''}}">
@@ -130,58 +149,98 @@ of the error message:
 </div>
 ```
 
-In the example, I've also made it add an error css class if there is an error present.
+I've also made it add an error css class if there is an error present.
 
-### Validators
+### the `validators` property
 
-Currently there are only a handful of built in validators.
+The validator functions that the validator instance can use live in the `validators` property, with
+each validator being given a default set at construction.  The default set live in the static `validators`
+property -- changing this will change the default set given to each new instance.
 
-* `required: true` - the value of the field isn't `''`, `undefined`, or `null`
-* `required: 'group name'` - the field will be required if other things in the same
-group have data, otherwise, it should be empty
-* `number: true` - the field is a number
-* `integer: true` - the field is a whole number
-* `positive: true` - the field is positive
-* `moment: <moment.js date format>` - the field is a valid date according to the given
-[moment.js date format](http://momentjs.com/docs/#/parsing/string-format/)
-* `dataType: <string|integer|boolean>` - checks the data type of the object, mostly
-for backend API stuff
-* `password: 'keypath'` - makes sure the field and the specified keypath match, handy
-for forms with a 'confirm password' field
+Remember from earlier a rule looks like this:
+
+    'some.keypath': {required: true, type: 'string'}
+
+Here, `required` and `type` match properties of the `validators` property.  If you use a rule name that
+is not recognised, it'll throw an exception when validaton is being performed; unless the argument is
+a function, in which case, it'll use the function as a validator.  This is a handy way to define
+one-off custom validators, e.g.:
+
+    'some.keypath': {mySuperValidator: function (value, ruleValue, result) { ... }}
+
+If you're going to use that validator a bunch of times though, you're better to put it in the `validators`
+property:
+
+    validator.validators.mySuperValidator = function (value, ruleValue, result) { ... }
+
+Or, if you're going to use it in loads of different validators, you might even put it in the static
+property (before you instance anything that uses it):
+
+    RactiveValidator.validators.mySuperValidator = function (value, ruleValue, result) { ... }
+
+The arguments to the validaion function are thus:
+ * `value` - the value being validated
+ * `ruleValue` - the value of the property in the rule, e.g., for the example  `required: true`, `ruleValue` is `true`
+ * `result` - the result object - gives access to the model and the current errors
+
+`this` is set to the validator instance.
+
+A validator function returns an object with the following properties:
+ * `valid` - `true` if the value was valid; otherwise, `false`
+ * `error` - if `valid` is `false`, a message indicating why it is invalid
+ * `coerced` - the validator can coerce the data to some other value, if desired
+
+It may even return a promise for an object with those properties: this will cause the `validate` method to return a
+promise though.  This is especially useful for validators which need to make a call to the server to work.
 
 
-You can easily create your own validators too.  A validator is just a function which returns
-an object with a `valid` property, and an `error` message if not valid.  The arguments passed
-to the validator function are the field value, the value specified in the rule, and the result
-object, in that order, and `this` is the validator instance.  For example, here is the
-`password` validator:
+#### built in validators
+
+There are only a handful of built-in validators, for the most common cases.
+
+**required**
+
+If you add `required: true` as a rule, then the value will be considered invalid if it is an empty string,
+`null`, or `undefined`.  `required: false` is always valid, but is a handy way to get a value to show
+up in the `data` property of the validation result if there are no other validation requirements.
+
+**moment**
+
+This checks that the value is valid according to the given moment.js format, e.g., `moment: 'DD/MM/YYYY'` will
+validate only if the string is a valid UK date.  By default, the `data` property of the validation result
+will contain a property for the field containing the same value as the field; however, you can have it
+converted to a moment object illustrated in the more complete value below:
 
 ```javascript
-password: function (value, otherfield, result) {
-  if (value != result.model.get(otherfield)) {
-    return {valid: false, error: 'passwords must match'};
-  } else {
-    return {valid: true};
-  }
-}
-```
-
-It might be handy for you to know that the library uses John Resig's ridiculously obfuscated
-[Class pattern](http://ejohn.org/blog/simple-javascript-inheritance) (seriously, he's a genius, but
-I would hate to be on a team with him) to define the `RactiveValidator` and `RactiveValidator.ObjectModel`
-classes, so they can be extended in the manner described in that article.  An obvious use for this
-would be to add more validators:
-
-```javascript
-var MyValidator = RactiveValidator.extend({
-  init: function (model, format) {
-    this._super(model, format);
-    this.validators.mysupervalidator = mysupervalidator;
-  }
+var validator = new RactiveValidator(ractive, {
+  'date': {required: true, moment: {format: 'DD/MM/YYYY', coerce: true}}
 });
 
-var validator = new MyValidator(model, format);
+var validation = validator.validate();
+// validation.data.date will be a moment object representing the input date
 ```
+
+You can also specify the rule as `moment: {format: 'DD/MM/YYYY', coerce: 'YYYY-MM-DD'}` for example, to have
+it coerced to a date string in a different format.  This is useful if you want your UI to accept dates in
+one format, and have your API accept the date in ISO format for example.
+
+**positive**
+
+This makes sure that the value is positive.
+
+**type**
+
+This ensures that the value matches the specified type, one of the following: string, integer, decimal, and
+boolean.  For validation of models passed into the constructor, the data will be coerced into the required
+type if possible.  E.g., if the rule is `type: 'decimal'`, and the value is `'5.5'`, then the data after
+validation will be `5.5`.
+
+However, for validation of models specified as an argument to `validate`, it will give a validation error if
+the type is not actually the specified type.
+
+**password**
+
+A validator for 'confirm password' fields: checks that the value matches the value at the specified keypath.
 
 ### Disabling validation
 
