@@ -133,7 +133,8 @@
     # Validates a specific keypath
     #
     validateKeypath: (value, keypath, result, rules) ->
-      coerced = null
+      coerced = undefined
+      
       # this code is crazy in order to support there sometimes being promises -
       # it boils down more or less to a simple iteration over the keys and values
       # in the rules argument, only continuing to the next if the current succeeded
@@ -161,7 +162,7 @@
             result.model.set(keypath + @errorSuffix, undefined) if not result.immediate
             
             # save the coerced value if there is one
-            coerced = validation.coerced if validation.coerced?
+            coerced = validation.coerced if typeof validation.coerced != 'undefined'
             
             # continue, if necessary
             if i < rules.length - 1
@@ -185,7 +186,7 @@
       coda = ->
         # if it was valid, set the corresponding result.data
         if result.valid
-          result.data.set(keypath, if coerced? then coerced else value)
+          result.data.set(keypath, if typeof coerced != 'undefined' then coerced else value)
       
       if r?.then
         r.then coda

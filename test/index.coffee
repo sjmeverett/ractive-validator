@@ -90,6 +90,11 @@ describe 'RactiveValidator', ->
         expect(v.valid).to.be.true
         expect(v.coerced).to.equal 5
       
+      it 'should be valid for integer type and an empty string', ->
+        v = val.type('', 'integer', immediate: false)
+        expect(v.valid).to.be.true
+        expect(v.coerced).to.equal null
+      
       it 'should be invalid for integer type and a decimal string', ->
         expect(val.type('5.5', 'integer', immediate: false).valid).to.be.false
       
@@ -153,15 +158,18 @@ describe 'RactiveValidator', ->
       model = new ObjectModel
         num: '1'
         str: 'fish'
+        empty: ''
       
       validator = new RactiveValidator model,
         num: {required: true, type: 'integer'}
         str: {required: true}
+        empty: {type: 'integer'}
       
       validation = validator.validate()
       expect(validation.valid).to.be.true
       expect(validation.data.num).to.equal 1
       expect(validation.data.str).to.equal 'fish'
+      expect(validation.data.empty).to.equal null
     
     
     it 'should be invalid for an invalid model', ->
