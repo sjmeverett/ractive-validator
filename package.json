@@ -1,14 +1,10 @@
 {
   "name": "ractive-validator",
-  "version": "2.0.1",
+  "version": "2.0.5",
   "description": "Validates objects according to given rules, in a manner compatible with Ractive (ractivejs.org).",
   "author": "Stewart MacKenzie-Leigh",
   "license": "MIT",
   "main": "./dist/index.js",
-  "files": [
-    "./dist/index.js",
-    "./README.md"
-  ],
   "scripts": {
     "prepublish": "gulp"
   },

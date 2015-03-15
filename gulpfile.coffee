@@ -2,11 +2,6 @@
 gulp = require 'gulp'
 $ = (require 'gulp-load-plugins')()
 
-gulp.task 'lint', ->
-  gulp.src './src/**/*.coffee'
-    .pipe $.coffeelint()
-    .pipe $.coffeelint.reporter()
-
 
 gulp.task 'build', ->
   gulp.src './src/**/*.coffee'
@@ -14,4 +9,4 @@ gulp.task 'build', ->
     .pipe gulp.dest './dist'
 
 
-gulp.task 'default', ['lint', 'build'], ->
+gulp.task 'default', ['build'], ->

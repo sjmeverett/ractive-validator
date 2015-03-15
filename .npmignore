@@ -1,3 +1,5 @@
 src/
 test/
-gulpfile.*
+gulpfile.js
+gulpfile.coffee
+.gitignore
