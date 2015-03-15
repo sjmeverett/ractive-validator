@@ -302,7 +302,9 @@
 
         # integer
         else if type == 'integer'
-          if (typeof value == 'number' and (value % 1) != 0) or
+          if value == ''
+            return valid: true, coerced: null
+          else if (typeof value == 'number' and (value % 1) != 0) or
               (typeof value != 'number' and result.immediate) or
               (value? and value != '' and not /^(\-|\+)?([0-9]+)$/.test(value))
             return valid: false, error: 'must be a whole number'
@@ -311,7 +313,9 @@
 
         # decimal
         else if type == 'decimal'
-          if (typeof value != 'number' and result.immediate) or
+          if value == ''
+            return valid: true, coerced: null
+          else if (typeof value != 'number' and result.immediate) or
               (value? and value != '' and not /^(\-|\+)?([0-9]+(\.[0-9]+)?)$/.test(value))
             return valid: false, error: 'must be a decimal'
           else
@@ -319,7 +323,9 @@
 
         # boolean
         else if type == 'boolean'
-          if (typeof value != 'boolean' and result.immediate) or
+          if value == ''
+            return valid: true, coerced: null
+          else if (typeof value != 'boolean' and result.immediate) or
               (value? and value != '' and not /^(true|false)$/.test(value))
             return valid: false, error: 'must be a boolean'
           else
