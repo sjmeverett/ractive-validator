@@ -91,7 +91,7 @@
       
       # polyfill models without expandKeypath method (i.e., ractive)
       if not result.model.expandKeypath
-        model.expandKeypath = ObjectModel.prototype.expandKeypath
+        result.model.expandKeypath = ObjectModel.prototype.expandKeypath
 
       # validate the model
       promises = []
