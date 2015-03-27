@@ -330,7 +330,7 @@
               (value? and value != '' and not /^(true|false)$/.test(value))
             return valid: false, error: 'must be a boolean'
           else
-            return valid: true, coerced: value == 'true'
+            return valid: true, coerced: value == 'true' || value == true
 
         # unknown type
         else
