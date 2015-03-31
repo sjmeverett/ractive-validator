@@ -172,6 +172,7 @@
             result.valid = false
             result.errors.set keypath, validation.error
             result.model.set(keypath + @errorSuffix, validation.error) if not result.immediate
+            return
         
         # call the coda somehow, depending whether or not we have a promise
         if validation.then
