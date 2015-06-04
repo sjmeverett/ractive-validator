@@ -13,7 +13,7 @@
   else if window?
     # browser
     window.Validator = factory(window.moment, window.Q)
-  
+
 )((moment, Q) ->
   global = class RactiveValidator
     ##
@@ -49,11 +49,11 @@
       # set up observers if necessary
       if @model?.observe?
         @observeModel()
-    
-    
+
+
     ##
     # Set up observers on model
-    # 
+    #
     observeModel: ->
       for rulepath in @rules
         @model.observe rulepath, (newValue, oldValue, keypath) =>
@@ -61,8 +61,8 @@
               @validateKeypath newValue, keypath, result, @rules[rulepath]
           ,
             init: false
-    
-    
+
+
     ##
     # Sets whether or not the observing validation is enabled
     #
@@ -71,7 +71,7 @@
       # clear the error messages
       @model.set(@basePath + keypath + @errorSuffix) for keypath in @rules
 
-    
+
     ##
     # Validates either the model given in the constructor or as an argument
     # @param model (optional) the model to validate
@@ -84,18 +84,18 @@
         data: new ObjectModel()
         groups: []
         immediate: model?
-      
+
       # wrap POJOs in an ObjectModel
       if not (result.model.get and result.model.set)
         result.model = new ObjectModel result.model
-      
+
       # polyfill models without expandKeypath method (i.e., ractive)
       if not result.model.expandKeypath
         result.model.expandKeypath = ObjectModel.prototype.expandKeypath
 
       # validate the model
       promises = []
-      
+
       for keypath, rules of @rules
         p = @validateWildcardKeypath @basePath + keypath, result, rules
         promises.push p if p?.then
@@ -110,39 +110,39 @@
         valid: result.valid
         errors: result.errors.model
         data: result.data.get(@basePath.substring(0, @basePath.length - 1))
-    
-    
+
+
     ##
     # Validates a keypath possibly containing a wildcard
     #
     validateWildcardKeypath: (keypath, result, rules) ->
       paths = result.model.expandKeypath keypath
       promises = []
-      
+
       for path in paths
         p = @validateKeypath result.model.get(path), path, result, rules
         promises.push p if p?.then
-      
+
       if promises.length
         if not Q?
           throw new Error 'need Q library for promises support'
         return Q.all promises
-    
-    
+
+
     ##
     # Validates a specific keypath
     #
     validateKeypath: (value, keypath, result, rules) ->
       coerced = undefined
-      
+
       # this code is crazy in order to support there sometimes being promises -
       # it boils down more or less to a simple iteration over the keys and values
       # in the rules argument, only continuing to the next if the current succeeded
-      
+
       # what to do with each rule
       fn = (i, rules) =>
         {rule, ruleValue} = rules[i]
-        
+
         # if it's not a known rule, but it does define a function, use that function
         if not @validators.hasOwnProperty(rule)
           if typeof ruleValue is 'function'
@@ -154,16 +154,16 @@
 
         # validate
         validation = validator.call(this, value, ruleValue, result)
-        
+
         # what to do after each rule
         coda = (validation) =>
           if validation.valid
             # clear the error message if necessary
             result.model.set(keypath + @errorSuffix, undefined) if not result.immediate
-            
+
             # save the coerced value if there is one
             coerced = validation.coerced if typeof validation.coerced != 'undefined'
-            
+
             # continue, if necessary
             if i < rules.length - 1
               fn i + 1, rules
@@ -173,22 +173,22 @@
             result.errors.set keypath, validation.error
             result.model.set(keypath + @errorSuffix, validation.error) if not result.immediate
             return
-        
+
         # call the coda somehow, depending whether or not we have a promise
         if validation.then
           validation.then coda
         else
           coda validation
-      
+
       # step through each rule in turn
       r = fn 0, ({rule, ruleValue} for rule, ruleValue of rules)
-      
+
       # what to do after all the rules
       coda = ->
         # if it was valid, set the corresponding result.data
         if result.valid
           result.data.set(keypath, if typeof coerced != 'undefined' then coerced else value)
-      
+
       if r?.then
         r.then coda
       else
@@ -263,7 +263,7 @@
       moment: (value, format) ->
         if not moment?
           throw new Error 'need moment.js library for moment validator'
-          
+
         # allow coerce format to be specified
         if typeof format != 'string'
           {format, coerce} = format
@@ -273,11 +273,13 @@
           return valid: true
 
         # check if it's valid
-        m = moment(value, format, true)
+        m = moment.utc(value, format, true)
 
         if m.isValid()
           if coerce == true
             return valid: true, coerced: m
+          else if coerce == 'date'
+            return valid: true, coerced: m.toDate()
           else if typeof coerce == 'string'
             return valid: true, coerced: m.format(coerce)
           else
@@ -359,7 +361,7 @@
     get: (keypath) ->
       if not keypath
         return @model
-      
+
       # expand wild cards etc to get a list of keypaths
       paths = @expandKeypath keypath
 
@@ -390,7 +392,7 @@
 
     ##
     # Expands paths with wildcards to a list of paths
-    # 
+    #
     expandKeypath: (keypath, paths) ->
       paths = paths or []
 
@@ -428,6 +430,6 @@
           obj[parent] = if isNaN(parseInt(child)) then {} else []
 
         return @getObj obj[parent], remainder
-  
+
   return global
 )
