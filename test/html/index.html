@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script src="../../node_modules/moment/moment.js"></script>
+    <script src="../../node_modules/jquery/dist/jquery.js"></script>
+    <script src="../../dist/ractive-validator.js"></script>
+
+    <style>
+      body {
+        font-family: sans-serif;
+      }
+    </style>
+  </head>
+
+  <body>
+    <form id="testForm">
+      <div class="form-group">
+        <label>Date</label>
+        <input type="text" name="date">
+      </div>
+
+      <button type="submit">
+        Submit
+      </button>
+    </form>
+
+    <script>
+      $(function () {
+        var validator = new RactiveValidator($('#testForm'), {
+          date: {required: true, moment: 'DD/MM/YYYY'}
+        });
+
+        $('#testForm').submit(function () {
+          try {
+            validator.validate();
+          } catch (e) {
+            console.error(e);
+          }
+          return false;
+        });
+      });
+    </script>
+  </body>
+</html>
