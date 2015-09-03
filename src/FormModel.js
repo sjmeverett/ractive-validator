@@ -1,5 +1,5 @@
 
-
+import $ from 'jquery';
 
 export default class FormModel {
   constructor(selector, options={}) {

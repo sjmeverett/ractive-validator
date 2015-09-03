@@ -9,9 +9,6 @@ object.
 ([Ractive.JS](http://www.ractivejs.org/) is a great framework for two-way model binding in javascript
 applications.)
 
-**Note:** the library was completely rewritten in CoffeeScript for version 2, and includes a couple of new features.
-It isn't completely backwards compatible!
-
 
 Installation
 -------------
@@ -22,14 +19,10 @@ Install via [npm](https://www.npmjs.org/):
 $ npm install --save ractive-validator
 ```
 
-You can also just clone it from github.  The main file is `dist/index.js`, which you could of
-course just download on its own.  If you want to run the tests, run `mocha` in the root
-directory (you'll need the dependencies installed).
-
 Usage
 ------
 
-The validator class can be used with AMD and node.  For example, using require.js you could write
+The `RactiveValidator` class can be used with AMD, node, and regular browser script soup type scenarios.  For example, using require.js you could write
 the following:
 
 ```javascript
@@ -54,7 +47,7 @@ var validator = new RactiveValidator(mymodel, {
 
 You can also just use it in the browser with a `script` tag.
 
-### The contructor
+### The constructor
 
 The constructor has the signature `new RactiveValidator(basePath, model, rules)`.  The first two
 arguments are optional, so you can have either, both, or neither of them.
@@ -99,9 +92,9 @@ the **Validators** section for what validators are allowed.
 #### the `model` parameter
 
 You can provide a model at construction.  It can either be just a Plain Old JavaScript Object, or a
-'model' object with `.get` and `.set` methods for getting and setting keypaths (e.g., a Ractive object).
+'model' object with `.get` and `.set` methods for getting and setting keypaths (e.g., a Ractive object).  You can also pass it a jQuery selector for a bunch of form fields you want validated.
 
-If the given model also has an `.observe` method (i.e., is a Ractive object), the validator will listen
+If the given model also has an `.observe` method (e.g., is a Ractive object), the validator will listen
 for changes to the keypaths defined in the rules, and validate in real time.
 
 
@@ -270,9 +263,26 @@ example, if you want the message for `name` to go into `nameError`, you would wr
 validator.errorSuffix = 'Error';
 ```
 
+
+Using on a conventional HTML form
+---------------------------------
+
+If you clone the repository and build it with `grunt release`, you'll get a `ractive-validator.js` and `ractive-validator.min.js` in the `dist/` directory.  Your HTML page will need to reference jQuery then one of these JavaScript files.
+
+You can then build an HTML form as normal, and then make a new RactiveValidator instance:
+
+```javascript
+var validator = new RactiveValidator($('#myform', {
+  // rules...
+}));
+```
+
+It will automatically subscribe to the `change` event so that the error messages get updated when the field loses focus.
+
+Have a look at `test/html/index.html` for a really quick example.
+
 The end
 --------
 
-It's probably a bit rough around the edges and there's probably some stuff missing, particularly
-common, useful validators.  Feel free to get in touch if you think there's something that should be
-added!
+I made this in my spare time, so it's probably a bit rough around the edges and there's probably some stuff missing, particularly
+common, useful validators.  Feel free to get in touch if you think there's something that should be added!

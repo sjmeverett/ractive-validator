@@ -236,3 +236,4 @@ all.validators.moment = all.validators.moment(moment);
 RactiveValidator.validators = all.validators;
 
 RactiveValidator.ObjectModel = ObjectModel;
+RactiveValidator.FormModel = FormModel;
