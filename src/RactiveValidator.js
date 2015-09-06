@@ -206,13 +206,13 @@ class RactiveValidator {
 
       if (!model.setError) {
         model.setError = function (keypath, value) {
-          _this.model.set(keypath + _this.errorSuffix, value);
+          this.set(keypath + _this.errorSuffix, value);
         };
       }
 
       if (!model.clearError) {
         model.clearError = function (keypath) {
-          _this.model.set(keypath + _this.errorSuffix);
+          this.set(keypath + _this.errorSuffix);
         };
       }
     }
