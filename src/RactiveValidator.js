@@ -167,9 +167,7 @@ class RactiveValidator {
       } else {
         result.valid = false;
         result.errors.set(keypath, validation.error);
-
-        if (!result.immediate)
-          result.model.setError(keypath, validation.error);
+        result.model.setError(keypath, validation.error);
       }
     };
 
