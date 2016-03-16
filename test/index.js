@@ -408,18 +408,18 @@ describe('RactiveValidator', function () {
 
   describe('Observable', function () {
     it('should set an error message when a field is updated', function () {
-      let ractive = new Ractive({data: {a: ''}});
-      let validator = new RactiveValidator(ractive, {a: {type: 'integer'}});
-      ractive.set('a', 'fish');
-      expect(ractive.get('aMsg')).to.equal('must be a whole number');
+      let ractive = new Ractive({data: {a: {b: ''}}});
+      let validator = new RactiveValidator('a', ractive, {b: {type: 'integer'}});
+      ractive.set('b', 'fish');
+      expect(ractive.get('bMsg')).to.equal('must be a whole number');
     });
 
     it('should clear the error message if a field is updated to be correct', function () {
-      let ractive = new Ractive({data: {a: ''}});
-      let validator = new RactiveValidator(ractive, {a: {required: true}});
-      ractive.set('aMsg', 'error');
-      ractive.set('a', 'fish');
-      expect(ractive.get('aMsg')).to.not.exist;
+      let ractive = new Ractive({data: {a: {b: ''}}});
+      let validator = new RactiveValidator('a', ractive, {b: {required: true}});
+      ractive.set('bMsg', 'error');
+      ractive.set('b', 'fish');
+      expect(ractive.get('bMsg')).to.not.exist;
     });
   });
 });

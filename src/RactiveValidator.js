@@ -35,7 +35,7 @@ class RactiveValidator {
     };
 
     for (let rulepath in this.rules) {
-      this.model.observe(rulepath, function (newValue, oldValue, keypath) {
+      this.model.observe(this.basePath + rulepath, function (newValue, oldValue, keypath) {
         if (_this.enabled) {
           _this.validateKeypath(newValue, keypath, result, _this.rules[rulepath]);
         }
