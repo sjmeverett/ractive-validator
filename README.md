@@ -1,17 +1,15 @@
-A form validator compatible with the Ractive.JS framework
-=========================================================
+# A form validator compatible with the Ractive.JS framework
 
-This package can be used to perform custom validation on JavaScript objects -- although the name of
-the package is `ractive-validator`, it doesn't have to be used with Ractive.  I like to use it on
-the client-side with Ractive, and also on the server, with the same rules, checking the request.body
-object.
+This package can be used to perform custom validation on JavaScript objects -- although  the name of
+the package is `ractive-validator`, it doesn't have to be used with Ractive.  I like to  use it on
+the client-side with Ractive, and also on the server, with the same rules, checking the
+`request.body` object.
 
 ([Ractive.JS](http://www.ractivejs.org/) is a great framework for two-way model binding in javascript
 applications.)
 
 
-Installation
--------------
+## Installation
 
 Install via [npm](https://www.npmjs.org/):
 
@@ -19,8 +17,7 @@ Install via [npm](https://www.npmjs.org/):
 $ npm install --save ractive-validator
 ```
 
-Usage
-------
+## Usage
 
 The `RactiveValidator` class can be used with AMD, node, and regular browser script soup type scenarios.  For example, using require.js you could write
 the following:
@@ -264,8 +261,7 @@ validator.errorSuffix = 'Error';
 ```
 
 
-Using on a conventional HTML form
----------------------------------
+## Using on a conventional HTML form
 
 If you clone the repository and build it with `grunt release`, you'll get a `ractive-validator.js` and `ractive-validator.min.js` in the `dist/` directory.  Your HTML page will need to reference jQuery then one of these JavaScript files.
 
@@ -281,8 +277,7 @@ It will automatically subscribe to the `change` event so that the error messages
 
 Have a look at `test/html/index.html` for a really quick example.
 
-The end
---------
+## The end
 
 I made this in my spare time, so it's probably a bit rough around the edges and there's probably some stuff missing, particularly
 common, useful validators.  Feel free to get in touch if you think there's something that should be added!
